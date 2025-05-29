@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ETS Sand Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+    }
+    .results {
+      margin-top: 20px;
+      background: #f3f3f3;
+      padding: 15px;
+      border-radius: 5px;
+    }
+    .results div {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>ETS Sand Calculator</h2>
+
+  <label for="length">Trench Length (m)</label>
+  <input type="number" id="length" placeholder="e.g. 20">
+
+  <label for="width">Trench Width (mm)</label>
+  <input type="number" id="width" placeholder="e.g. 400">
+
+  <label for="d1">Duct 1 Diameter (mm)</label>
+  <input type="number" id="d1" placeholder="e.g. 100">
+  <label for="q1">Duct 1 Quantity</label>
+  <input type="number" id="q1" placeholder="e.g. 2">
+
+  <label for="d2">Duct 2 Diameter (mm)</label>
+  <input type="number" id="d2" placeholder="optional">
+  <label for="q2">Duct 2 Quantity</label>
+  <input type="number" id="q2" placeholder="optional">
+
+  <label for="d3">Duct 3 Diameter (mm)</label>
+  <input type="number" id="d3" placeholder="optional">
+  <label for="q3">Duct 3 Quantity</label>
+  <input type="number" id="q3" placeholder="optional">
+
+  <button onclick="calculateSand()">Calculate</button>
+
+  <div class="results" id="results"></div>
+
+  <script>
+    function calculateSand() {
+      const length = parseFloat(document.getElementById('length').value) || 0;
+      const width = parseFloat(document.getElementById('width').value) || 0;
+
+      const d1 = parseFloat(document.getElementById('d1').value);
+      const q1 = parseFloat(document.getElementById('q1').value);
+      const d2 = parseFloat(document.getElementById('d2').value);
+      const q2 = parseFloat(document.getElementById('q2').value);
+      const d3 = parseFloat(document.getElementById('d3').value);
+      const q3 = parseFloat(document.getElementById('q3').value);
+
+      const ducts = [];
+      if (!isNaN(d1) && !isNaN(q1) && d1 > 0 && q1 > 0) ducts.push({ diameter: d1, qty: q1 });
+      if (!isNaN(d2) && !isNaN(q2) && d2 > 0 && q2 > 0) ducts.push({ diameter: d2, qty: q2 });
+      if (!isNaN(d3) && !isNaN(q3) && d3 > 0 && q3 > 0) ducts.push({ diameter: d3, qty: q3 });
+
+      const base = 50;
+      const top = 50;
+      const density = 1.6;
+
+      let maxDiameter = 0;
+      let ductVolume = 0;
+
+      ducts.forEach(d => {
+        if (d.diameter > maxDiameter) maxDiameter = d.diameter;
+        ductVolume += Math.PI * Math.pow((d.diameter / 1000) / 2, 2) * length * d.qty;
+      });
+
+      const sandHeight = ducts.length > 0 ? base + maxDiameter + top : 0;
+
+      const trenchVolume = length * (width / 1000) * (sandHeight / 1000);
+      const sandVolume = trenchVolume - ductVolume;
+      const sandMass = sandVolume * density;
+
+      document.getElementById('results').innerHTML = `
+        <div><strong>Trench Width:</strong> ${width.toFixed(0)} mm</div>
+        <div><strong>Sand Height:</strong> ${sandHeight} mm</div>
+        <div><strong>Total Trench Volume:</strong> ${trenchVolume.toFixed(3)} m³</div>
+        <div><strong>Duct Volume:</strong> ${ductVolume.toFixed(3)} m³</div>
+        <div><strong>Net Sand Volume:</strong> ${sandVolume.toFixed(3)} m³</div>
+        <div><strong>Sand Mass:</strong> ${sandMass.toFixed(2)} tonnes</div>
+      `;
+    }
+  </script>
+</body>
+</html>
